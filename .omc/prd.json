@@ -1,0 +1,199 @@
+{
+  "project": "OMC_RosBagPlayer",
+  "description": "ROS1 Rosbag Player with WebGL Acceleration — Electron desktop, C++ bag reader, TypeScript UI, Three.js renderer",
+  "stories": [
+    {
+      "id": "US-001",
+      "title": "PR1: Monorepo Scaffold and Tooling",
+      "passes": true,
+      "priority": 1,
+      "acceptanceCriteria": [
+        "git init creates a git repository at the project root",
+        ".gitignore exists and contains entries for: node_modules, build/, dist/, *.node",
+        "pnpm-workspace.yaml exists and defines packages/* and apps/*",
+        "root package.json exists with scripts: lint, typecheck, test, build",
+        "turbo.json exists with pipeline: build depends on ^build, test depends on build",
+        "tsconfig.base.json exists with strict: true and target: ES2022",
+        "packages/rosbag-reader, packages/message-deserializer, packages/player-core, packages/renderer, packages/ui each have package.json and tsconfig.json",
+        "apps/desktop has package.json with electron pinned to ~30.x",
+        "eslint.config.mjs exists with TypeScript plugin and Prettier integration",
+        ".prettierrc exists",
+        "packages/rosbag-reader/CMakeLists.txt exists and parseable (npx cmake-js configure exits 0)",
+        "jest.config.ts exists at root with project references for each TS package",
+        "pnpm install completes without errors",
+        "pnpm run lint exits 0 with zero violations",
+        "pnpm run typecheck exits 0 with zero errors",
+        "pnpm run test exits 0 with >= 1 passing test (placeholder in player-core)",
+        "pnpm run build exits 0"
+      ]
+    },
+    {
+      "id": "US-002",
+      "title": "PR2: C++ Native Bag Reader Addon",
+      "passes": true,
+      "priority": 2,
+      "acceptanceCriteria": [
+        "packages/rosbag-reader/src/addon.cpp exists with N-API bindings",
+        "N-API exposes: openBag(filePath), getTopics(handle), getConnections(handle), createIterator(handle, topics, start?, end?), nextMessage(iterator), closeBag(handle)",
+        "getConnections() returns objects with fields: topic, type, md5sum, messageDefinition (non-empty string), callerid?",
+        "LZ4 decompression is implemented (vendored or cmake find_package)",
+        "BZ2 decompression is implemented",
+        "test/fixtures/generate_fixture.py exists and generates a valid .bag file using pip rosbag",
+        "test/fixtures/test.bag is committed (~1MB, contains PointCloud2, Image, LaserScan, Odometry messages)",
+        "npx cmake-js build compiles the addon on Linux (exit 0)",
+        "require('./build/Release/rosbag_reader.node') loads without error",
+        "Jest tests pass: openBag, getTopics returns expected topics, getConnections returns messageDefinition strings, iterate messages, closeBag",
+        "Error handling tests pass: missing file returns descriptive error, empty bag returns 0 topics",
+        "Google Test C++ tests pass via ctest (topic listing, message count, timestamp ordering, decompression)",
+        "docs/spikes/ipc-spike-results.md exists with pass/fail determination (8MB buffer, >=30 trans/sec, p99 <5ms)",
+        "docs/spikes/wasm-spike-results.md exists with pass/fail determination or 'skipped'"
+      ]
+    },
+    {
+      "id": "US-003",
+      "title": "PR2.5: Message Deserializer Package",
+      "passes": true,
+      "priority": 3,
+      "acceptanceCriteria": [
+        "packages/message-deserializer/src/index.ts exists and exports parseMessageDefinition, deserializeMessage",
+        "parseMessageDefinition(msgDefStr: string) returns a MessageDefinition object",
+        "deserializeMessage<T>(def, buffer) returns typed object T",
+        "Convenience exports: deserializePointCloud2, deserializeImage, deserializeLaserScan, deserializeOdometry",
+        "TypeScript types exported: MessageDefinition, PointCloud2Fields, ImageFields, LaserScanFields, OdometryFields",
+        "Nested type resolution works: Odometry -> PoseWithCovariance -> Pose -> Point (3+ levels deep)",
+        "Unit test: parseMessageDefinition of known PointCloud2 .msg string produces correct field descriptors",
+        "Unit test: parseMessageDefinition of nav_msgs/Odometry resolves all nested sub-types",
+        "Unit test: deserializePointCloud2 on test fixture buffer produces height, width, fields[], point_step matching fixture values",
+        "Unit test: deserializeImage on test fixture buffer produces height, width, encoding, step matching fixture values",
+        "Unit test: deserializeLaserScan on test fixture buffer produces angle_min, angle_max, ranges[] matching fixture values",
+        "Unit test: deserializeOdometry on test fixture buffer produces pose.position.x/y/z, pose.orientation.x/y/z/w matching fixture values",
+        "All unit tests pass (pnpm --filter message-deserializer test exits 0)",
+        "Package exports ESM, has no Node.js-specific APIs (works in browser context)",
+        "pnpm run typecheck includes message-deserializer with zero errors"
+      ]
+    },
+    {
+      "id": "US-004",
+      "title": "PR3: TypeScript Playback Engine",
+      "passes": true,
+      "priority": 4,
+      "acceptanceCriteria": [
+        "packages/player-core/src/PlaybackEngine.ts exists",
+        "MessageSource interface defined with getTopics(), getConnections(), createIterator(topics, start?, end?)",
+        "MessageIterator interface defined with next(): Promise<RawMessage | null>",
+        "PlaybackEngine state machine implements: IDLE, LOADING, PAUSED, PLAYING, SEEKING states",
+        "PlaybackEngine methods: load(source), play(), pause(), seek(timestamp), setSpeed(0.1-4.0), setEnabledTopics(topics[])",
+        "PlaybackEngine events: 'message', 'stateChange', 'timeUpdate'",
+        "Unit test: messages arrive in timestamp order with correct relative delays (within 50ms tolerance)",
+        "Unit test: pause() stops message emission, resume() continues from correct position",
+        "Unit test: seek(timestamp) causes next message to have timestamp >= target (within 1ms)",
+        "Unit test: setSpeed(2.0) halves inter-message delay (within 25ms tolerance)",
+        "Unit test: setEnabledTopics(['topicA']) produces zero message events for topicB",
+        "Integration test: load test fixture bag, play all messages, verify count matches getTopics() total",
+        "PlaybackEngine has zero DOM or Electron imports",
+        "pnpm --filter player-core test exits 0",
+        "pnpm run typecheck includes player-core with zero errors"
+      ]
+    },
+    {
+      "id": "US-005",
+      "title": "PR4: WebGL Renderers — PointCloud2, LaserScan, Odometry",
+      "passes": false,
+      "priority": 5,
+      "acceptanceCriteria": [
+        "packages/renderer/src/SceneManager.ts exists with Scene, PerspectiveCamera, WebGLRenderer, OrbitControls",
+        "packages/renderer/src/PointCloud2Renderer.ts exists and accepts PointCloud2Fields from message-deserializer",
+        "packages/renderer/src/LaserScanRenderer.ts exists and accepts LaserScanFields from message-deserializer",
+        "packages/renderer/src/OdometryRenderer.ts exists and accepts OdometryFields from message-deserializer",
+        "PointCloud2Renderer uses THREE.BufferGeometry + Float32BufferAttribute for positions",
+        "PointCloud2Renderer uses THREE.Points with ShaderMaterial for colormap",
+        "No raw Buffer parsing in any renderer file (all use typed objects from message-deserializer)",
+        "Unit test: PointCloud2Renderer with known PointCloud2Fields produces BufferGeometry positions matching expected XYZ within 1e-6",
+        "Unit test: LaserScanRenderer polar-to-Cartesian for angles 0, pi/2, pi produces correct XY within 1e-6",
+        "Unit test: OdometryRenderer fed 10 poses produces line geometry with 10 vertices",
+        "OdometryRenderer TF handling: renders in single user-selected reference frame, frame extracted once at load",
+        "dispose() on each renderer leaves renderer.info.memory.geometries unchanged (no GPU leak)",
+        "Benchmark: 100k synthetic PointCloud2 points renders at mean >= 30 FPS over 100 frames",
+        "pnpm --filter renderer test exits 0",
+        "pnpm run typecheck includes renderer with zero errors"
+      ]
+    },
+    {
+      "id": "US-006",
+      "title": "PR5: Image Topic Renderer",
+      "passes": false,
+      "priority": 6,
+      "acceptanceCriteria": [
+        "packages/renderer/src/ImageRenderer.ts exists and accepts ImageFields from message-deserializer",
+        "ImageRenderer supports rgb8 encoding: known 4x4 input produces correct RGBA output (byte-for-byte)",
+        "ImageRenderer supports bgr8 encoding: channels swapped correctly in RGBA output",
+        "ImageRenderer supports mono8 encoding: grayscale value replicated to R,G,B in RGBA output",
+        "ImageRenderer reuses DataTexture across frame updates (texture count stays constant over 1000 updates)",
+        "No raw Buffer parsing in ImageRenderer (uses ImageFields from message-deserializer)",
+        "Unit test: rgb8 4x4 synthetic image → RGBA output matches expected bytes",
+        "Unit test: bgr8 4x4 synthetic image → RGBA output matches expected bytes (channels swapped)",
+        "Unit test: mono8 4x4 synthetic image → RGBA output matches expected bytes",
+        "Unit test: texture dimensions match ImageFields.width and ImageFields.height",
+        "pnpm --filter renderer test exits 0 (including ImageRenderer tests)",
+        "pnpm run typecheck includes renderer with zero errors"
+      ]
+    },
+    {
+      "id": "US-007",
+      "title": "PR6: Electron UI and Integration",
+      "passes": false,
+      "priority": 7,
+      "acceptanceCriteria": [
+        "apps/desktop/src/main.ts exists with BrowserWindow creation and 'Open Bag File' menu item",
+        "apps/desktop/src/preload.ts exists with contextBridge or MessagePort IPC bridge",
+        "packages/ui/src/App.tsx exists with sidebar (TopicPanel) + main (Viewport3D + Timeline) layout",
+        "packages/ui/src/TopicPanel.tsx lists topics with checkboxes, type, and message count",
+        "packages/ui/src/PlaybackControls.tsx has Play/Pause button and speed dropdown (0.1x, 0.25x, 0.5x, 1x, 2x, 4x)",
+        "packages/ui/src/Timeline.tsx is a seekable progress bar with click-to-seek",
+        "packages/ui/src/Viewport3D.tsx hosts Three.js canvas and dispatches messages to renderers",
+        "packages/ui/src/FrameSelector.tsx is a dropdown populated at bag load time",
+        "IPC transport matches PR2 spike decision (contextBridge if spike passed, SharedArrayBuffer if not)",
+        "Integration test: mocked IPC open bag → TopicPanel lists correct topic count and names",
+        "Integration test: play → mock renderer receives message call count matching expected message count",
+        "pnpm --filter desktop dev starts Electron app without errors (exit check)",
+        "pnpm --filter ui test exits 0",
+        "pnpm run typecheck includes ui and desktop with zero errors"
+      ]
+    },
+    {
+      "id": "US-008",
+      "title": "PR7: Performance Polish and Cross-Platform Builds",
+      "passes": false,
+      "priority": 8,
+      "acceptanceCriteria": [
+        "Benchmark test exists at packages/renderer/src/__benchmarks__/pointcloud-fps.ts",
+        "Benchmark: 500k synthetic PointCloud2 at 10 Hz renders at mean >= 30 FPS over 100 frames (stretch target)",
+        "Regression test: 100k points at 10 Hz renders at mean >= 30 FPS (v1 baseline, must not regress)",
+        "Frame-skip logic implemented: if renderer is behind, skip to latest message per topic",
+        "CMake toolchain file for macOS (clang) exists at packages/rosbag-reader/cmake/toolchain-macos.cmake",
+        "CMake toolchain file for Windows (MSVC) exists at packages/rosbag-reader/cmake/toolchain-windows.cmake",
+        "prebuild-install configured in packages/rosbag-reader/package.json",
+        "Keyboard shortcuts implemented: Space (play/pause), Left/Right (seek 1s), +/- (speed)",
+        "pnpm run test exits 0 (all packages)",
+        "pnpm run build exits 0 on Linux"
+      ]
+    },
+    {
+      "id": "US-009",
+      "title": "PR8: CI/CD and Release Pipeline",
+      "passes": false,
+      "priority": 9,
+      "acceptanceCriteria": [
+        ".github/workflows/ci.yml exists with push and pull_request triggers",
+        "ci.yml matrix includes: ubuntu-22.04, macos-13, windows-2022",
+        "ci.yml steps include: checkout, setup-pnpm, install, lint, typecheck, build (cmake-js), test",
+        "ci.yml includes caching for pnpm store and CMake build directory",
+        ".github/workflows/release.yml exists with tag push trigger (v*)",
+        "release.yml builds Electron app for Linux (AppImage, deb), macOS (dmg), Windows (nsis)",
+        "electron-builder config exists in apps/desktop/package.json with native addon in extraFiles",
+        "README.md exists with CI badge and project description",
+        "All workflow YAML files are valid (yamllint or actionlint passes)"
+      ]
+    }
+  ]
+}

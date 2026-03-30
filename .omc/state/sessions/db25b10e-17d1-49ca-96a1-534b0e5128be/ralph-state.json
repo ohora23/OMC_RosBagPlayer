@@ -1,0 +1,14 @@
+{
+  "active": true,
+  "iteration": 1,
+  "max_iterations": 20,
+  "current_phase": "prd_setup",
+  "task_description": "Implement ROS1 Rosbag Player with WebGL acceleration — 9 PRs, monorepo, C++ bag reader, TypeScript UI, Three.js renderer",
+  "plan_path": ".omc/plans/rosbag-player-v1.md",
+  "_meta": {
+    "mode": "ralph",
+    "sessionId": "db25b10e-17d1-49ca-96a1-534b0e5128be",
+    "updatedAt": "2026-03-26T15:49:20.972Z",
+    "updatedBy": "state_write_tool"
+  }
+}
