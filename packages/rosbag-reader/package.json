@@ -1,0 +1,20 @@
+{
+  "name": "@omc/rosbag-reader",
+  "version": "0.1.0",
+  "description": "C++ native addon for reading ROS1 bag files",
+  "main": "build/Release/rosbag_reader.node",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "cmake-js build",
+    "build:ts": "tsc --build",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --build",
+    "clean": "cmake-js clean && rm -rf dist"
+  },
+  "devDependencies": {
+    "cmake-js": "^7.0.0",
+    "node-addon-api": "^8.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

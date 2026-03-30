@@ -1,0 +1,25 @@
+{
+  "name": "@omc/desktop",
+  "version": "0.1.0",
+  "description": "Electron desktop app for the ROS1 bag player",
+  "main": "dist/main.js",
+  "scripts": {
+    "dev": "electron .",
+    "build": "tsc --build",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src --ext .ts,.tsx",
+    "typecheck": "tsc --build",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@omc/rosbag-reader": "workspace:*",
+    "@omc/message-deserializer": "workspace:*",
+    "@omc/player-core": "workspace:*",
+    "@omc/ui": "workspace:*"
+  },
+  "devDependencies": {
+    "electron": "~30.5.0",
+    "electron-builder": "^24.0.0",
+    "@types/node": "^20.0.0"
+  }
+}

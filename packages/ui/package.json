@@ -1,0 +1,34 @@
+{
+  "name": "@omc/ui",
+  "version": "0.1.0",
+  "description": "React UI components for the ROS1 bag player",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src --ext .tsx,.ts",
+    "typecheck": "tsc --build",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@omc/player-core": "workspace:*",
+    "@omc/renderer": "workspace:*",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0",
+    "zustand": "^5.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.0.0",
+    "@types/react-dom": "^18.0.0",
+    "@testing-library/react": "^16.0.0",
+    "@testing-library/jest-dom": "^6.0.0"
+  }
+}

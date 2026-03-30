@@ -1,0 +1,21 @@
+{
+  "name": "@omc/message-deserializer",
+  "version": "0.1.0",
+  "description": "ROS1 message definition parser and typed deserializers",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --build",
+    "clean": "rm -rf dist"
+  }
+}

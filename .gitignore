@@ -1,0 +1,16 @@
+node_modules/
+build/
+dist/
+*.node
+*.o
+*.a
+.cache/
+.turbo/
+.pnpm-store/
+*.tsbuildinfo
+CMakeFiles/
+CMakeCache.txt
+cmake_install.cmake
+Makefile
+apps/desktop/.webpack/
+apps/desktop/out/

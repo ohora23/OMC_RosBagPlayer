@@ -1,0 +1,25 @@
+{
+  "name": "@omc/player-core",
+  "version": "0.1.0",
+  "description": "TypeScript playback engine for ROS1 bag messages",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --build",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@omc/message-deserializer": "workspace:*",
+    "@omc/rosbag-reader": "workspace:*"
+  }
+}

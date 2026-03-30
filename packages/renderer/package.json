@@ -1,0 +1,29 @@
+{
+  "name": "@omc/renderer",
+  "version": "0.1.0",
+  "description": "Three.js WebGL renderers for ROS1 sensor data",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "test": "jest --passWithNoTests",
+    "lint": "eslint src --ext .ts",
+    "typecheck": "tsc --build",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@omc/message-deserializer": "workspace:*",
+    "three": "^0.167.0"
+  },
+  "devDependencies": {
+    "@types/three": "^0.167.0",
+    "jest-webgl-canvas-mock": "^2.0.0"
+  }
+}

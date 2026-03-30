@@ -1,0 +1,17 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "dist",
+    "rootDir": "src",
+    "module": "CommonJS",
+    "moduleResolution": "node",
+    "lib": ["ES2022"]
+  },
+  "include": ["src/**/*"],
+  "references": [
+    { "path": "../../packages/rosbag-reader" },
+    { "path": "../../packages/message-deserializer" },
+    { "path": "../../packages/player-core" },
+    { "path": "../../packages/ui" }
+  ]
+}
